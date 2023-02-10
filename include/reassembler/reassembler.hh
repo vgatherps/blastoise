@@ -11,13 +11,18 @@ namespace reassembler {
 struct BulkForward {
   Packet head;
   std::vector<Packet> buffered;
+  bool operator==(const BulkForward &o) const = default;
 };
 
 struct Forward {
   Packet packet;
+
+  bool operator==(const Forward &o) const = default;
 };
 
-struct SkipPacket {};
+struct SkipPacket {
+  bool operator==(const SkipPacket &o) const = default;
+};
 
 using ForwardResult = std::variant<SkipPacket, Forward, BulkForward>;
 

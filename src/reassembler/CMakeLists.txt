@@ -1,1 +1,1 @@
-target_sources(blastoise PRIVATE most_recent.cc forward_all.cc fully_ordered.cc reassembler.cc)
+target_sources(blastoise PRIVATE reassembler.cc)

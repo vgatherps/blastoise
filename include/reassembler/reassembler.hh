@@ -8,14 +8,14 @@
 namespace blastoise {
 namespace reassembler {
 
-struct BulkForward {
-  Packet head;
-  std::vector<Packet> buffered;
+template <class Storage> struct BulkForward {
+  Packet<Storage> head;
+  std::vector<Packet<Storage>> buffered;
   bool operator==(const BulkForward &o) const = default;
 };
 
-struct Forward {
-  Packet packet;
+template <class Storage> struct Forward {
+  Packet<Storage> packet;
 
   bool operator==(const Forward &o) const = default;
 };
@@ -24,26 +24,33 @@ struct SkipPacket {
   bool operator==(const SkipPacket &o) const = default;
 };
 
-using ForwardResult = std::variant<SkipPacket, Forward, BulkForward>;
+template <class Storage>
+using ForwardResult =
+    std::variant<SkipPacket, Forward<Storage>, BulkForward<Storage>>;
 
 /// This interface describes something that reassembles a single stream
 /// from a reliable/ordered stream and an unreliable/unordered stream
-class Reassembler {
+template <class Storage> class Reassembler {
 
 public:
-  virtual ForwardResult handle_reliable(Packet p,
-                                        PacketSequence last_forwarded) = 0;
+  virtual ForwardResult<Storage>
+  handle_reliable(Packet<Storage> p, PacketSequence last_forwarded) = 0;
 
-  virtual ForwardResult handle_unreliable(Packet packet,
-                                          PacketSequence last_forwarded,
-                                          PacketSequence last_reliable) = 0;
+  virtual ForwardResult<Storage>
+  handle_unreliable(Packet<Storage> packet, PacketSequence last_forwarded,
+                    PacketSequence last_reliable) = 0;
 
   virtual ~Reassembler() {}
 };
 
 enum class ForwarderType { FullyOrdered, ForwardAll, MostRecent };
 
-std::unique_ptr<Reassembler> create_reassembler(ForwarderType);
+template <class Storage>
+std::unique_ptr<Reassembler<Storage>> create_reassembler(ForwarderType);
+
+template <>
+std::unique_ptr<Reassembler<std::vector<std::uint8_t>>>
+    create_reassembler(ForwarderType);
 
 } // namespace reassembler
 } // namespace blastoise

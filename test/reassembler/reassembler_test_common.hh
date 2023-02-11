@@ -5,13 +5,21 @@
 
 using namespace blastoise::reassembler;
 
+using Blob = std::vector<std::uint8_t>;
+
 inline PacketSequence make_sequence(std::uint32_t sequence) {
   return PacketSequence{.sequence = sequence, .hash = 0};
 }
-inline Packet make_packet(std::uint32_t sequence,
-                          std::vector<std::uint8_t> data) {
-  return Packet(make_sequence(sequence), std::move(data));
+inline Packet<Blob> make_packet(std::uint32_t sequence, Blob data) {
+  return Packet<Blob>(make_sequence(sequence), std::move(data));
 }
 
-inline ForwardResult forward(Packet p) { return Forward{std::move(p)}; }
-inline ForwardResult skip() { return SkipPacket(); }
+inline ForwardResult<Blob> forward(Packet<Blob> p) {
+  return Forward<Blob>{std::move(p)};
+}
+
+inline ForwardResult<Blob> bulk(Packet<Blob> p,
+                                std::vector<Packet<Blob>> rest) {
+  return BulkForward<Blob>{.head = std::move(p), .buffered = std::move(rest)};
+}
+inline ForwardResult<Blob> skip() { return SkipPacket(); }

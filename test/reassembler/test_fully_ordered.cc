@@ -13,6 +13,24 @@ TEST(ForwardsNextUnreliable, FullyOrderedTests) {
       forward(packet));
 }
 
+TEST(SkipStaleUnReliable, FullyOrderedTests) {
+  Packet packet = make_packet(112, {1, 2, 3, 4, 5});
+
+  FullyOrderedReassembler<Blob> reass;
+
+  ASSERT_EQ(
+      reass.handle_unreliable(packet, make_sequence(112), make_sequence(112)),
+      skip());
+}
+
+TEST(SkipStaleReliable, FullyOrderedTests) {
+  Packet packet = make_packet(112, {1, 2, 3, 4, 5});
+
+  FullyOrderedReassembler<Blob> reass;
+
+  ASSERT_EQ(reass.handle_reliable(packet, make_sequence(112)), skip());
+}
+
 TEST(ForwardsUnreliableOnUnreliable, FullyOrderedTests) {
   Packet next_packet = make_packet(113, {1, 2, 3, 4, 5});
   Packet late_packet = make_packet(114, {6, 7, 8, 9, 10});

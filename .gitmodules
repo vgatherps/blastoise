@@ -1,0 +1,3 @@
+[submodule "submodules/scelta"]
+	path = submodules/scelta
+	url = https://github.com/SuperV1234/scelta.git

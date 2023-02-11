@@ -6,16 +6,14 @@ namespace blastoise {
 namespace reassembler {
 
 /// This reassembler forwards anything after the most recent sequence
-template <class Storage>
-class MostRecentReassembler final : public Reassembler<Storage> {
+template <class Storage> class MostRecentReassembler {
 public:
-  ForwardResult<Storage>
-  handle_reliable(Packet<Storage> packet,
-                  PacketSequence last_forwarded) override;
+  ForwardResult<Storage> handle_reliable(Packet<Storage> packet,
+                                         PacketSequence last_forwarded);
 
-  ForwardResult<Storage>
-  handle_unreliable(Packet<Storage> packet, PacketSequence last_forwarded,
-                    PacketSequence last_reliable) override;
+  ForwardResult<Storage> handle_unreliable(Packet<Storage> packet,
+                                           PacketSequence last_forwarded,
+                                           PacketSequence last_reliable);
 };
 
 template <class Storage>

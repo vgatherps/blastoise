@@ -10,19 +10,17 @@ namespace reassembler {
 
 /// This reassembler forwards one copy of every received packet, in
 /// arbitrary order
-template <class Storage>
-class ForwardAllReassembler final : public Reassembler<Storage> {
+template <class Storage> class ForwardAllReassembler {
 
   std::unordered_set<PacketSeqNo> unconfirmed_packets;
 
 public:
-  ForwardResult<Storage>
-  handle_reliable(Packet<Storage> packet,
-                  PacketSequence last_forwarded) override;
+  ForwardResult<Storage> handle_reliable(Packet<Storage> packet,
+                                         PacketSequence last_forwarded);
 
-  ForwardResult<Storage>
-  handle_unreliable(Packet<Storage> packet, PacketSequence last_forwarded,
-                    PacketSequence last_reliable) override;
+  ForwardResult<Storage> handle_unreliable(Packet<Storage> packet,
+                                           PacketSequence last_forwarded,
+                                           PacketSequence last_reliable);
 };
 
 template <class Storage>

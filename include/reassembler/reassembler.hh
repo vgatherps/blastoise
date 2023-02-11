@@ -28,29 +28,17 @@ template <class Storage>
 using ForwardResult =
     std::variant<SkipPacket, Forward<Storage>, BulkForward<Storage>>;
 
-/// This interface describes something that reassembles a single stream
-/// from a reliable/ordered stream and an unreliable/unordered stream
+enum class ForwarderType { FullyOrdered, ForwardAll, MostRecent };
+
 template <class Storage> class Reassembler {
-
 public:
-  virtual ForwardResult<Storage>
-  handle_reliable(Packet<Storage> p, PacketSequence last_forwarded) = 0;
-
-  virtual ForwardResult<Storage>
-  handle_unreliable(Packet<Storage> packet, PacketSequence last_forwarded,
-                    PacketSequence last_reliable) = 0;
-
+  virtual ForwardResult<Storage> handle_reliable(Packet<Storage> p) = 0;
+  virtual ForwardResult<Storage> handle_unreliable(Packet<Storage> p) = 0;
   virtual ~Reassembler() {}
 };
 
-enum class ForwarderType { FullyOrdered, ForwardAll, MostRecent };
-
 template <class Storage>
 std::unique_ptr<Reassembler<Storage>> create_reassembler(ForwarderType);
-
-template <>
-std::unique_ptr<Reassembler<std::vector<std::uint8_t>>>
-    create_reassembler(ForwarderType);
 
 } // namespace reassembler
 } // namespace blastoise

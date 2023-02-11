@@ -9,8 +9,7 @@
 namespace blastoise {
 namespace reassembler {
 
-template <class Storage>
-class FullyOrderedReassembler final : public Reassembler<Storage> {
+template <class Storage> class FullyOrderedReassembler {
 
   struct PendingPacketBatch {
     std::vector<Packet<Storage>> packets;
@@ -22,13 +21,12 @@ class FullyOrderedReassembler final : public Reassembler<Storage> {
   void insert_pending(Packet<Storage> packet);
 
 public:
-  ForwardResult<Storage>
-  handle_reliable(Packet<Storage> packet,
-                  PacketSequence last_forwarded) override;
+  ForwardResult<Storage> handle_reliable(Packet<Storage> packet,
+                                         PacketSequence last_forwarded);
 
-  ForwardResult<Storage>
-  handle_unreliable(Packet<Storage> packet, PacketSequence last_forwarded,
-                    PacketSequence last_reliable) override;
+  ForwardResult<Storage> handle_unreliable(Packet<Storage> packet,
+                                           PacketSequence last_forwarded,
+                                           PacketSequence last_reliable);
 };
 
 template <class Storage>

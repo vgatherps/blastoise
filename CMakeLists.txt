@@ -16,6 +16,11 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
+find_package(Seastar REQUIRED)
+
+target_link_libraries(blastoise
+    Seastar::seastar)
+
 include_directories(include)
 include_directories(submodules/scelta/include)
 add_subdirectory(src)

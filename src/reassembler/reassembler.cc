@@ -7,25 +7,26 @@
 #include <deque>
 #include <optional>
 
-#include "scelta.hpp"
+#include <scelta.hpp>
+#include <seastar/net/tcp.hh>
 
 namespace blastoise {
 namespace reassembler {
 
 template <class R, class Storage>
-concept CPacketReassembler =
-    requires(R r, Packet<Storage> p, PacketSequence last_forwarded) {
-      {
-        r.handle_reliable(std::move(p), last_forwarded)
-        } -> std::same_as<ForwardResult<Storage>>;
-    } &&
-    requires(R r, Packet<Storage> p, PacketSequence last_forwarded,
-             PacketSequence last_reliable) {
-      {
-        r.handle_unreliable(std::move(p), last_forwarded, last_reliable)
-        } -> std::same_as<ForwardResult<Storage>>;
-    } &&
-    std::is_default_constructible_v<R>;
+concept CPacketReassembler = requires(R r, Packet<Storage> p,
+                                      PacketSequence last_forwarded) {
+  {
+    r.handle_reliable(std::move(p), last_forwarded)
+    } -> std::same_as<ForwardResult<Storage>>;
+}
+&&requires(R r, Packet<Storage> p, PacketSequence last_forwarded,
+           PacketSequence last_reliable) {
+  {
+    r.handle_unreliable(std::move(p), last_forwarded, last_reliable)
+    } -> std::same_as<ForwardResult<Storage>>;
+}
+&&std::is_default_constructible_v<R>;
 
 template <class Storage, CPacketReassembler<Storage> R>
 struct ReassemblyBuffer {
@@ -126,12 +127,21 @@ do_create_reassembler(ForwarderType type) {
     return std::make_unique<
         PacketReassembler<Storage, FullyOrderedReassembler<Storage>>>();
   }
+  // Unreachable
+  throw std::runtime_error(
+      "Impossible enum value reached in creation function");
 }
 
 template <>
 std::unique_ptr<Reassembler<std::vector<std::uint8_t>>>
 create_reassembler(ForwarderType t) {
   return do_create_reassembler<std::vector<std::uint8_t>>(t);
+}
+
+template <>
+std::unique_ptr<Reassembler<seastar::net::packet>>
+create_reassembler(ForwarderType t) {
+  return do_create_reassembler<seastar::net::packet>(t);
 }
 
 } // namespace reassembler

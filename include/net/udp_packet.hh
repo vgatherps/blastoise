@@ -1,8 +1,8 @@
 #pragma once
 
+#include "seastar/net/packet.hh"
 #include <seastar/core/temporary_buffer.hh>
 
-#include <cstdint>
 #include <span>
 
 namespace blastoise::net {
@@ -26,14 +26,20 @@ namespace blastoise::net {
 // I *think* that using temporary buffer is the way to go here, instead of
 // trying to do it myself? I *think* that does what I want?
 class UdpPacket {
-  seastar::temporary_buffer<std::uint8_t> underlying;
+  seastar::temporary_buffer<char> underlying;
+  seastar::deleter del;
+  seastar::net::fragment frag;
 
+public:
   // TODO make this take a deleter allowing truer copyless/allocationless IO?
-  UdpPacket(std::span<std::uint8_t> data);
+  UdpPacket(std::span<char> data);
+
   UdpPacket(UdpPacket &&) = default;
   UdpPacket &operator=(UdpPacket &&) = default;
 
   UdpPacket(const UdpPacket &other) = delete;
   UdpPacket &operator=(const UdpPacket &) = delete;
+
+  seastar::net::packet create_packet();
 };
 } // namespace blastoise::net

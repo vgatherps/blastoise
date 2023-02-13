@@ -13,6 +13,6 @@ class UdpGroup {
   std::unordered_map<protocol::ClientId, UdpSocket> sockets;
 
 public:
-  void send_to_all(const UdpPacket &packet);
+  void send_to_all(UdpPacket &packet);
 };
 } // namespace blastoise::net

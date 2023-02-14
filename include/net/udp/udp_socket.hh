@@ -1,6 +1,6 @@
 #pragma once
 
-#include "net/udp_packet.hh"
+#include "net/udp/udp_packet.hh"
 
 #include <seastar/net/api.hh>
 

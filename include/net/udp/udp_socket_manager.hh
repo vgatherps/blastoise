@@ -1,6 +1,6 @@
 #pragma once
 
-#include "net/udp_socket.hh"
+#include "net/udp/udp_socket.hh"
 #include "protocol/client.hh"
 
 #include <seastar/core/pipe.hh>

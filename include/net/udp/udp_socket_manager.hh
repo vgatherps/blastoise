@@ -33,7 +33,7 @@ class UdpSocketManager
   std::vector<seastar::future<>> cached_batch;
   std::vector<UdpFailure> waiting_failures;
 
-  seastar::future<> do_send_to_all(UdpPacket &packet);
+  seastar::future<> do_send_to_all(seastar::net::packet &packet);
 
   friend seastar::enable_lw_shared_from_this<UdpSocketManager>;
 
@@ -45,7 +45,7 @@ public:
   seastar::lw_shared_ptr<UdpSocketManager>
   make_udp_group(std::size_t max_outstanding);
 
-  seastar::future<> send_to_all(UdpPacket &packet);
+  seastar::future<> send_to_all(seastar::net::packet packet);
 
   std::vector<UdpFailure> get_failed_sockets() {
     return std::move(waiting_failures);

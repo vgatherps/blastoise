@@ -5,33 +5,37 @@
 
 namespace blastoise::net {
 
-seastar::future<> UdpSocketManager::send_to_all(UdpPacket &packet) {
+seastar::future<> UdpSocketManager::send_to_all(seastar::net::packet packet) {
   return seastar::with_semaphore(
       outstanding_batch_tracker, 1,
-      [this, &packet]() { return this->do_send_to_all(packet); });
+      [myself = shared_from_this(), packet = std::move(packet)]() mutable {
+        return myself->do_send_to_all(packet);
+      });
 }
 
-seastar::future<> UdpSocketManager::do_send_to_all(UdpPacket &packet) {
+seastar::future<>
+UdpSocketManager::do_send_to_all(seastar::net::packet &packet) {
   cached_batch.clear();
 
   for (auto &[id, socket] : sockets) {
 
     // callback takes ownership of the socket to ensure it stays alive
     // if an error ahndler deletes it
-    seastar::future<> sent = socket->send(packet).handle_exception(
-        [myself = shared_from_this(), id,
-         _socket = socket](std::exception_ptr e) {
-          // TODO is it possible for this code to get run before the event loop
-          // starts? I rely on this to never modify the map while iterating over
-          // it
-          auto lookup = myself->sockets.find(id);
-          if (lookup != myself->sockets.end()) {
-            myself->sockets.erase(lookup);
-            myself->waiting_failures.push_back(
-                UdpFailure{.failed_id = id, .except = std::move(e)});
-          }
-          return seastar::make_ready_future();
-        });
+    seastar::future<> sent =
+        socket->send(packet.share())
+            .handle_exception([myself = shared_from_this(), id,
+                               _socket = socket](std::exception_ptr e) {
+              // TODO is it possible for this code to get run before the event
+              // loop starts? I rely on this to never modify the map while
+              // iterating over it
+              auto lookup = myself->sockets.find(id);
+              if (lookup != myself->sockets.end()) {
+                myself->sockets.erase(lookup);
+                myself->waiting_failures.push_back(
+                    UdpFailure{.failed_id = id, .except = std::move(e)});
+              }
+              return seastar::make_ready_future();
+            });
     cached_batch.push_back(std::move(sent));
   }
 

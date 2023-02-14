@@ -1,8 +1,7 @@
 #pragma once
 
-#include "net/udp/udp_packet.hh"
-
 #include <seastar/net/api.hh>
+#include <seastar/net/packet.hh>
 
 namespace blastoise::net {
 class UdpSocket {
@@ -10,6 +9,6 @@ class UdpSocket {
   seastar::socket_address addr;
 
 public:
-  seastar::future<> send(UdpPacket &packet);
+  seastar::future<> send(seastar::net::packet packet);
 };
 } // namespace blastoise::net

@@ -10,6 +10,6 @@ class UdpSocket {
   seastar::socket_address addr;
 
 public:
-  seastar::future<> send(const UdpPacket &packet);
+  seastar::future<> send(UdpPacket &packet);
 };
 } // namespace blastoise::net

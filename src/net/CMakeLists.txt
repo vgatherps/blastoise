@@ -1,1 +1,1 @@
-target_sources(blastoise PRIVATE udp_group.cc udp_packet.cc)
+target_sources(blastoise PRIVATE udp_group.cc udp_packet.cc udp_socket.cc)

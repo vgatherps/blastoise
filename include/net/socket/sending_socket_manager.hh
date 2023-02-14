@@ -51,5 +51,8 @@ public:
   std::vector<SendFailure> get_failed_sockets() {
     return std::move(waiting_failures);
   }
+
+  void add_client(protocol::ClientId id, seastar::shared_ptr<Socket> socket);
+  bool remove_client(protocol::ClientId id);
 };
 } // namespace blastoise::net

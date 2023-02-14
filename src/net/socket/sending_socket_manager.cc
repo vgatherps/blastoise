@@ -51,6 +51,18 @@ seastar::future<> SendingSocketManager::do_send_to_all(
                                    myself->cached_batch.end());
 }
 
+void SendingSocketManager::add_client(protocol::ClientId id,
+                                      seastar::shared_ptr<Socket> socket) {
+  auto [_, inserted] = sockets.try_emplace(id, std::move(socket));
+  if (!inserted) {
+    throw std::runtime_error("Duplicate ID insertion");
+  }
+}
+
+bool SendingSocketManager::remove_client(protocol::ClientId id) {
+  return sockets.erase(id);
+}
+
 SendingSocketManager::SendingSocketManager(std::size_t max_outstanding)
     : outstanding_batch_tracker(max_outstanding) {
   if (max_outstanding == 0) {

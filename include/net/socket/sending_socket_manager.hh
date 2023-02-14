@@ -27,13 +27,14 @@ class SendingSocketManager
   // and then claim all of the outstanding usage
   // to remove from the map
   // it's 99% simpler to just make everything shared
-  std::unordered_map<protocol::ClientId, seastar::lw_shared_ptr<Socket>>
-      sockets;
+  std::unordered_map<protocol::ClientId, seastar::shared_ptr<Socket>> sockets;
   seastar::semaphore outstanding_batch_tracker;
   std::vector<seastar::future<>> cached_batch;
   std::vector<SendFailure> waiting_failures;
 
-  seastar::future<> do_send_to_all(seastar::net::packet &packet);
+  static seastar::future<>
+  do_send_to_all(seastar::lw_shared_ptr<SendingSocketManager>,
+                 seastar::net::packet packet);
 
   friend seastar::enable_lw_shared_from_this<SendingSocketManager>;
 
@@ -43,9 +44,9 @@ class SendingSocketManager
 
 public:
   seastar::lw_shared_ptr<SendingSocketManager>
-  make_udp_socket_manager(std::size_t max_outstanding);
+  make_socket_manager(std::size_t max_outstanding);
 
-  seastar::future<> send_to_all(seastar::net::packet packet);
+  seastar::future<seastar::future<>> send_to_all(seastar::net::packet packet);
 
   std::vector<SendFailure> get_failed_sockets() {
     return std::move(waiting_failures);

@@ -1,8 +1,8 @@
-#include "net/udp/udp_socket.hh"
+#include "net/socket/socket.hh"
 
 namespace blastoise::net {
 
-seastar::future<> UdpSocket::send(seastar::net::packet packet) {
+seastar::future<> Socket::send(seastar::net::packet packet) {
   return channel.send(addr, std::move(packet));
 }
 } // namespace blastoise::net

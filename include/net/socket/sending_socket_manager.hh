@@ -1,6 +1,6 @@
 #pragma once
 
-#include "net/udp/udp_socket.hh"
+#include "net/socket/socket.hh"
 #include "protocol/client.hh"
 
 #include <seastar/core/pipe.hh>
@@ -14,40 +14,40 @@
 
 namespace blastoise::net {
 
-struct UdpFailure {
+struct SendFailure {
   protocol::ClientId failed_id;
   std::exception_ptr except;
 };
 
-class UdpSocketManager
-    : public seastar::enable_lw_shared_from_this<UdpSocketManager> {
+class SendingSocketManager
+    : public seastar::enable_lw_shared_from_this<SendingSocketManager> {
 
   // One could implement some complex protocol
   // to wait for the semaphore to get entirely refilled
   // and then claim all of the outstanding usage
   // to remove from the map
   // it's 99% simpler to just make everything shared
-  std::unordered_map<protocol::ClientId, seastar::lw_shared_ptr<UdpSocket>>
+  std::unordered_map<protocol::ClientId, seastar::lw_shared_ptr<Socket>>
       sockets;
   seastar::semaphore outstanding_batch_tracker;
   std::vector<seastar::future<>> cached_batch;
-  std::vector<UdpFailure> waiting_failures;
+  std::vector<SendFailure> waiting_failures;
 
   seastar::future<> do_send_to_all(seastar::net::packet &packet);
 
-  friend seastar::enable_lw_shared_from_this<UdpSocketManager>;
+  friend seastar::enable_lw_shared_from_this<SendingSocketManager>;
 
-  UdpSocketManager(std::size_t max_outstanding);
+  SendingSocketManager(std::size_t max_outstanding);
 
-  friend seastar::lw_shared_ptr<UdpSocketManager>;
+  friend seastar::lw_shared_ptr<SendingSocketManager>;
 
 public:
-  seastar::lw_shared_ptr<UdpSocketManager>
-  make_udp_group(std::size_t max_outstanding);
+  seastar::lw_shared_ptr<SendingSocketManager>
+  make_udp_socket_manager(std::size_t max_outstanding);
 
   seastar::future<> send_to_all(seastar::net::packet packet);
 
-  std::vector<UdpFailure> get_failed_sockets() {
+  std::vector<SendFailure> get_failed_sockets() {
     return std::move(waiting_failures);
   }
 };

@@ -1,11 +1,12 @@
-#include "net/udp/udp_socket_manager.hh"
+#include "net/socket/sending_socket_manager.hh"
 
 #include <seastar/core/coroutine.hh>
 #include <seastar/core/when_all.hh>
 
 namespace blastoise::net {
 
-seastar::future<> UdpSocketManager::send_to_all(seastar::net::packet packet) {
+seastar::future<>
+SendingSocketManager::send_to_all(seastar::net::packet packet) {
   return seastar::with_semaphore(
       outstanding_batch_tracker, 1,
       [myself = shared_from_this(), packet = std::move(packet)]() mutable {
@@ -14,7 +15,7 @@ seastar::future<> UdpSocketManager::send_to_all(seastar::net::packet packet) {
 }
 
 seastar::future<>
-UdpSocketManager::do_send_to_all(seastar::net::packet &packet) {
+SendingSocketManager::do_send_to_all(seastar::net::packet &packet) {
   cached_batch.clear();
 
   for (auto &[id, socket] : sockets) {
@@ -32,7 +33,7 @@ UdpSocketManager::do_send_to_all(seastar::net::packet &packet) {
               if (lookup != myself->sockets.end()) {
                 myself->sockets.erase(lookup);
                 myself->waiting_failures.push_back(
-                    UdpFailure{.failed_id = id, .except = std::move(e)});
+                    SendFailure{.failed_id = id, .except = std::move(e)});
               }
               return seastar::make_ready_future();
             });
@@ -45,7 +46,7 @@ UdpSocketManager::do_send_to_all(seastar::net::packet &packet) {
   return seastar::when_all_succeed(cached_batch.begin(), cached_batch.end());
 }
 
-UdpSocketManager::UdpSocketManager(std::size_t max_outstanding)
+SendingSocketManager::SendingSocketManager(std::size_t max_outstanding)
     : outstanding_batch_tracker(max_outstanding) {
   if (max_outstanding == 0) {
     throw std::runtime_error(
@@ -55,9 +56,9 @@ UdpSocketManager::UdpSocketManager(std::size_t max_outstanding)
   cached_batch.reserve(max_outstanding);
 }
 
-seastar::lw_shared_ptr<UdpSocketManager>
-UdpSocketManager::make_udp_group(std::size_t max_outstanding) {
-  return seastar::make_lw_shared<UdpSocketManager>(max_outstanding);
+seastar::lw_shared_ptr<SendingSocketManager>
+SendingSocketManager::make_udp_socket_manager(std::size_t max_outstanding) {
+  return seastar::make_lw_shared<SendingSocketManager>(max_outstanding);
 }
 
 } // namespace blastoise::net

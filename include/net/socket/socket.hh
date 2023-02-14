@@ -4,7 +4,7 @@
 #include <seastar/net/packet.hh>
 
 namespace blastoise::net {
-class UdpSocket {
+class Socket {
   seastar::net::udp_channel channel;
   seastar::socket_address addr;
 

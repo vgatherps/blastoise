@@ -6,13 +6,12 @@
 #include <seastar/core/shared_ptr.hh>
 
 namespace blastoise::net {
-class BatchedSender
-    : public seastar::enable_lw_shared_from_this<BatchedSender> {
-  SendingSocketManager sockets;
+class BatchedSender {
+  seastar::lw_shared_ptr<SendingSocketManager> sockets;
   PacketAccumulator pending_packets;
 
 public:
-  BatchedSender(SendingSocketManager);
+  BatchedSender(seastar::lw_shared_ptr<SendingSocketManager>);
   BatchedSender(BatchedSender &&) = default;
   BatchedSender &operator=(BatchedSender &&) = default;
 

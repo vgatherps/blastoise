@@ -1,4 +1,4 @@
-#include "net/socket/sending_socket_manager.hh"
+#include "net/sending_socket_manager.hh"
 
 #include <seastar/core/coroutine.hh>
 #include <seastar/core/when_all.hh>
@@ -71,11 +71,6 @@ SendingSocketManager::SendingSocketManager(std::size_t max_outstanding)
   }
 
   cached_batch.reserve(max_outstanding);
-}
-
-seastar::lw_shared_ptr<SendingSocketManager>
-SendingSocketManager::make_socket_manager(std::size_t max_outstanding) {
-  return seastar::make_lw_shared<SendingSocketManager>(max_outstanding);
 }
 
 } // namespace blastoise::net

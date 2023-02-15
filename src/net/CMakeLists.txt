@@ -1,3 +1,1 @@
-add_subdirectory(udp)
-add_subdirectory(socket)
-add_subdirectory(tcp)
+target_sources(blastoise PRIVATE packet_accumulator.cc batched_sender.cc sending_socket_manager.cc socket.cc)

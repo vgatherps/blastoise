@@ -1,6 +1,6 @@
 #pragma once
 
-#include "net/socket/socket.hh"
+#include "net/socket.hh"
 #include "protocol/client.hh"
 
 #include <seastar/core/pipe.hh>
@@ -36,15 +36,10 @@ class SendingSocketManager
   do_send_to_all(seastar::lw_shared_ptr<SendingSocketManager>,
                  seastar::net::packet packet);
 
-  friend seastar::enable_lw_shared_from_this<SendingSocketManager>;
-
-  SendingSocketManager(std::size_t max_outstanding);
-
-  friend seastar::lw_shared_ptr<SendingSocketManager>;
-
 public:
-  seastar::lw_shared_ptr<SendingSocketManager>
-  make_socket_manager(std::size_t max_outstanding);
+  SendingSocketManager(std::size_t max_outstanding);
+  SendingSocketManager(SendingSocketManager &&) = default;
+  SendingSocketManager &operator=(SendingSocketManager &&) = default;
 
   seastar::future<seastar::future<>> send_to_all(seastar::net::packet packet);
 

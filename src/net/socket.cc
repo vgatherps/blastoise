@@ -1,4 +1,4 @@
-#include "net/socket/socket.hh"
+#include "net/socket.hh"
 
 namespace blastoise::net {
 

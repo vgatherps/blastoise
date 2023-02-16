@@ -5,18 +5,40 @@
 
 #include <seastar/core/shared_ptr.hh>
 
+#include <chrono>
+
 namespace blastoise::net {
-class BatchedSender {
+class BatchedSender
+    : public seastar::enable_lw_shared_from_this<BatchedSender> {
   seastar::lw_shared_ptr<SendingSocketManager> sockets;
   PacketAccumulator pending_packets;
 
+  std::chrono::microseconds resend_time;
+  std::size_t max_batch_size;
+  std::uint64_t send_sequence;
+
+  bool needs_timer_scheduled;
+
+  friend seastar::lw_shared_ptr<BatchedSender>;
+
+  BatchedSender(seastar::lw_shared_ptr<SendingSocketManager>,
+                std::chrono::microseconds, std::size_t);
+
+  static seastar::future<>
+      resend_on_timer(seastar::lw_shared_ptr<BatchedSender>, std::uint64_t);
+
+  void do_deposit_packet(seastar::net::packet packet);
+
 public:
-  BatchedSender(seastar::lw_shared_ptr<SendingSocketManager>);
   BatchedSender(BatchedSender &&) = default;
   BatchedSender &operator=(BatchedSender &&) = default;
 
-  void deposit_packet(seastar::net::packet packet);
-  std::optional<seastar::future<seastar::future<>>> send_batch();
+  seastar::lw_shared_ptr<BatchedSender>
+      make_batched_sender(seastar::lw_shared_ptr<SendingSocketManager>,
+                          std::chrono::microseconds, std::size_t);
+
+  seastar::future<bool> deposit_packet(seastar::net::packet packet);
+  seastar::future<> send_batch();
 };
 } // namespace blastoise::net
   // blastoise::net:publicseastar::enable_lw_shared_from_this<TcpSendLoop>

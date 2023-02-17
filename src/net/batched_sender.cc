@@ -1,9 +1,7 @@
 #include "net/batched_sender.hh"
 
 #include <seastar/core/coroutine.hh>
-#include <seastar/core/future.hh>
 #include <seastar/core/sleep.hh>
-#include <seastar/core/when_all.hh>
 
 #include <coroutine>
 

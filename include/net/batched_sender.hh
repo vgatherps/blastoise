@@ -33,12 +33,22 @@ public:
   BatchedSender(BatchedSender &&) = default;
   BatchedSender &operator=(BatchedSender &&) = default;
 
-  seastar::lw_shared_ptr<BatchedSender>
+  static seastar::lw_shared_ptr<BatchedSender>
       make_batched_sender(seastar::lw_shared_ptr<SendingSocketManager>,
                           std::chrono::microseconds, std::size_t);
 
   seastar::future<bool> deposit_packet(seastar::net::packet packet);
   seastar::future<> send_batch();
+
+  void add_client(protocol::ClientId id, seastar::shared_ptr<Socket> socket) {
+    sockets->add_client(id, std::move(socket));
+  }
+  bool remove_client(protocol::ClientId id) {
+    return sockets->remove_client(id);
+  }
+  std::vector<SendFailure> get_failed_sockets() {
+    return sockets->get_failed_sockets();
+  }
 };
 } // namespace blastoise::net
   // blastoise::net:publicseastar::enable_lw_shared_from_this<TcpSendLoop>

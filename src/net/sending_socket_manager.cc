@@ -73,4 +73,9 @@ SendingSocketManager::SendingSocketManager(std::size_t max_outstanding)
   cached_batch.reserve(max_outstanding);
 }
 
+seastar::lw_shared_ptr<SendingSocketManager>
+SendingSocketManager::make_socket_manager(std::size_t max_outstanding) {
+  return seastar::make_lw_shared<SendingSocketManager>(max_outstanding);
+}
+
 } // namespace blastoise::net

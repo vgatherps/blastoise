@@ -36,8 +36,13 @@ class SendingSocketManager
   do_send_to_all(seastar::lw_shared_ptr<SendingSocketManager>,
                  seastar::net::packet packet);
 
-public:
+  friend seastar::lw_shared_ptr<SendingSocketManager>;
   SendingSocketManager(std::size_t max_outstanding);
+
+public:
+  static seastar::lw_shared_ptr<SendingSocketManager>
+  make_socket_manager(std::size_t max_outstanding);
+
   SendingSocketManager(SendingSocketManager &&) = default;
   SendingSocketManager &operator=(SendingSocketManager &&) = default;
 

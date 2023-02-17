@@ -3,7 +3,7 @@
 #include <array>
 #include <cstdint>
 
-namespace blasoitse::protocol {
+namespace blastoise::protocol {
 
 // Stand-in for real symbology
 using NameKey = std::array<char, 8>;
@@ -29,5 +29,6 @@ enum class StreamType {
 struct StreamKey {
   NameKey exchange;
   NameKey market;
+  StreamType type;
 };
-} // namespace blasoitse::protocol
+} // namespace blastoise::protocol

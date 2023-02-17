@@ -51,4 +51,3 @@ public:
   }
 };
 } // namespace blastoise::net
-  // blastoise::net:publicseastar::enable_lw_shared_from_this<TcpSendLoop>

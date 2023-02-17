@@ -1,1 +1,1 @@
-target_sources(blastoise PRIVATE mask.cc)
+target_sources(blastoise PRIVATE mask.cc encoder.cc)

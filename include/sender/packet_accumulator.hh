@@ -1,6 +1,6 @@
 #pragma once
 
-#include "seastar/net/packet.hh"
+#include <seastar/net/packet.hh>
 
 namespace blastoise::net {
 class PacketAccumulator {

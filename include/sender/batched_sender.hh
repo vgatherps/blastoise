@@ -1,7 +1,7 @@
 #pragma once
 
-#include "net/packet_accumulator.hh"
-#include "net/sending_socket_manager.hh"
+#include "sender/packet_accumulator.hh"
+#include "sender/sending_socket_manager.hh"
 
 #include <seastar/core/shared_ptr.hh>
 

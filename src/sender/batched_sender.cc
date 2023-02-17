@@ -1,4 +1,4 @@
-#include "net/batched_sender.hh"
+#include "sender/batched_sender.hh"
 
 #include <seastar/core/coroutine.hh>
 #include <seastar/core/sleep.hh>

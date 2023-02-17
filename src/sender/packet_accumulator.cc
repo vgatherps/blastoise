@@ -1,4 +1,4 @@
-#include "net/packet_accumulator.hh"
+#include "sender/packet_accumulator.hh"
 
 namespace blastoise::net {
 void PacketAccumulator::append_packet(seastar::net::packet p) {

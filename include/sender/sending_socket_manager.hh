@@ -1,7 +1,7 @@
 #pragma once
 
-#include "net/socket.hh"
 #include "protocol/client.hh"
+#include "sender/socket.hh"
 
 #include <seastar/core/pipe.hh>
 #include <seastar/core/semaphore.hh>

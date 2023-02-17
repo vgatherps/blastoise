@@ -1,6 +1,6 @@
 #pragma once
 
-#include "net/batched_sender.hh"
+#include "sender/batched_sender.hh"
 
 #include <vector>
 

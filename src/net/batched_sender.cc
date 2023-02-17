@@ -25,9 +25,6 @@ BatchedSender::resend_on_timer(seastar::lw_shared_ptr<BatchedSender> self,
     self->needs_timer_scheduled = true;
     auto send_in_void = self->send_batch();
   }
-
-  // TODO is this needed to ensure scheduling happens?
-  co_return;
 }
 
 BatchedSender::BatchedSender(
@@ -83,10 +80,7 @@ seastar::future<> BatchedSender::send_batch() {
   if (pending_packets.size() > 0) {
     needs_timer_scheduled = true;
     send_sequence += 1;
-    return sockets->send_to_all(pending_packets.release_packet())
-        .discard_result();
-  } else {
-    return seastar::make_ready_future();
+    co_await sockets->send_to_all(pending_packets.release_packet());
   }
 }
 

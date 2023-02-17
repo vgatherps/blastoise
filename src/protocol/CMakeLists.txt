@@ -1,0 +1,1 @@
+target_sources(blastoise PRIVATE mask.cc)

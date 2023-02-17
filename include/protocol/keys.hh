@@ -3,6 +3,8 @@
 #include <array>
 #include <cstdint>
 
+namespace blasoitse::protocol {
+
 // Stand-in for real symbology
 using NameKey = std::array<char, 8>;
 
@@ -28,3 +30,4 @@ struct StreamKey {
   NameKey exchange;
   NameKey market;
 };
+} // namespace blasoitse::protocol

@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-namespace blastoise::net {
+namespace blastoise::protocol {
 
 void mask_in_place(std::span<std::uint8_t> bytes, PacketMask mask) {
   constexpr std::size_t MASK_SIZE = mask.size();
@@ -20,4 +20,4 @@ void mask_in_place(std::span<std::uint8_t> bytes, PacketMask mask) {
     bytes[at] ^= mask[at % MASK_SIZE];
   }
 }
-} // namespace blastoise::net
+} // namespace blastoise::protocol

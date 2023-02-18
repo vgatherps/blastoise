@@ -5,7 +5,7 @@
 namespace blastoise::protocol {
 
 using PacketSeqNo = std::uint32_t;
-using PacketHash = std::uint16_t;
+using PacketHash = std::uint32_t;
 
 struct PacketSequence {
   PacketSeqNo sequence;
@@ -36,8 +36,10 @@ struct PacketHeader {
   PacketSequence packet_sequence() const {
     return PacketSequence{.sequence = sequence, .hash = checksum};
   }
-};
+} __attribute__((packed));
 
-static_assert(sizeof(PacketHeader) == 12, "Packet header has wrong size");
+static_assert(sizeof(PacketHeader) == 14, "Packet header has wrong size");
+static_assert(alignof(PacketHeader) == 1,
+              "Packet header has nontrivial padding/alignment");
 
 } // namespace blastoise::protocol

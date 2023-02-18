@@ -1,5 +1,7 @@
 #pragma once
 
+#include "protocol/header.hh"
+
 #include <cstdint>
 #include <span>
 #include <vector>
@@ -7,33 +9,15 @@
 namespace blastoise {
 namespace reassembler {
 
-using PacketSeqNo = std::uint32_t;
-using PacketHash = std::uint32_t;
-
-struct PacketSequence {
-  PacketSeqNo sequence;
-  PacketHash hash;
-
-  bool ahead_of(const PacketSequence &other) const {
-    return sequence > other.sequence;
-  }
-
-  bool implies_already_seen(const PacketSequence &other) const {
-    return !other.ahead_of(*this);
-  }
-
-  bool succeeds(const PacketSequence &other) const {
-    return sequence == (other.sequence + 1);
-  }
-
-  bool operator==(const PacketSequence &other) const = default;
-};
+using protocol::PacketHash;
+using protocol::PacketSeqNo;
+using protocol::PacketSequence;
 
 template <class Storage> struct Packet {
   PacketSequence sequence;
   Storage data;
 
-  Packet(PacketSequence seq, std::vector<std::uint8_t> data)
+  Packet(PacketSequence seq, Storage data)
       : sequence(seq), data(std::move(data)) {}
 
   bool operator==(const Packet<Storage> &other) const = default;

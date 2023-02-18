@@ -5,7 +5,7 @@
 
 namespace blastoise::protocol::detail {
 // Doing the union gives us 100% control over the initialization,
-// meaning we can have out cake (directly reference data member)
+// meaning we can have our cake (directly reference data member)
 // and eat it to (get control of load/initialize via static function)
 // If this were a normal variable, it would be possible for initialization
 // to happen in the wrong order and potentially overwrite set bytes

@@ -3,12 +3,12 @@
 #include "reassembler/fully_ordered.hh"
 #include "reassembler/most_recent.hh"
 
+#include <scelta.hpp>
+#include <seastar/net/packet.hh>
+
 #include <concepts>
 #include <deque>
 #include <optional>
-
-#include <scelta.hpp>
-#include <seastar/net/tcp.hh>
 
 namespace blastoise {
 namespace reassembler {

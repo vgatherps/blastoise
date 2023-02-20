@@ -8,6 +8,7 @@ namespace reassembler {
 /// This reassembler forwards anything after the most recent sequence
 template <class Storage> class MostRecentReassembler {
 public:
+  constexpr static bool HasOrderedPackets = true;
   ForwardResult<Storage> handle_reliable(Packet<Storage> packet,
                                          PacketSequence last_forwarded);
 

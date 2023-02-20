@@ -6,6 +6,7 @@
 #include <scelta.hpp>
 #include <seastar/net/packet.hh>
 
+#include <algorithm>
 #include <concepts>
 #include <deque>
 #include <optional>
@@ -26,7 +27,8 @@ concept CPacketReassembler = requires(R r, Packet<Storage> p,
     r.handle_unreliable(std::move(p), last_forwarded, last_reliable)
     } -> std::same_as<ForwardResult<Storage>>;
 }
-&&std::is_default_constructible_v<R>;
+&&std::is_default_constructible_v<R>
+    &&std::same_as<const bool, decltype(R::HasOrderedPackets)>;
 
 template <class Storage, CPacketReassembler<Storage> R>
 struct ReassemblyBuffer {
@@ -40,16 +42,38 @@ struct ReassemblyBuffer {
   ForwardResult<Storage> handle_unreliable(Packet<Storage> p) {
     ForwardResult<Storage> forward = reassembler.handle_unreliable(
         std::move(p), last_forwarded, last_reliable);
-    scelta::match([this](SkipPacket) {},
-                  [this](const Forward<Storage> &f) {
-                    this->forwarded_unreliable.push_back(f.packet.sequence);
-                  },
-                  [this](const BulkForward<Storage> &b) {
-                    this->forwarded_unreliable.push_back(b.head.sequence);
-                    for (const auto &packet : b.buffered) {
-                      this->forwarded_unreliable.push_back(packet.sequence);
-                    }
-                  })(forward);
+    scelta::match(
+        [this](SkipPacket) {},
+
+        [this](const Forward<Storage> &f) {
+          if constexpr (R::HasOrderedPackets) {
+            this->forwarded_unreliable.push_back(f.packet.sequence);
+          } else {
+            // Find the insertion position by insertion after the
+            // first packet that the inbound one is ahead of
+            auto it = std::find_if(forwarded_unreliable.rbegin(),
+                                   forwarded_unreliable.rend(),
+                                   [&f](const PacketSequence &s) {
+                                     return f.packet.sequence.ahead_of(s);
+                                   });
+            this->forwarded_unreliable.insert(it.base(), f.packet.sequence);
+          }
+        },
+
+        // assumption here - we know that these are only created
+        // by fully ordered streams, so we can avoid any sort of
+        // ordering overhead
+        [this](const BulkForward<Storage> &b) {
+          if constexpr (!R::HasOrderedPackets) {
+            throw std::runtime_error(
+                "BulkForward should only be used with fully ordered "
+                "reassemblers");
+          }
+          this->forwarded_unreliable.push_back(b.head.sequence);
+          for (const auto &packet : b.buffered) {
+            this->forwarded_unreliable.push_back(packet.sequence);
+          }
+        })(forward);
     update_last_forwarded(forward);
     return forward;
   }
@@ -81,6 +105,7 @@ struct ReassemblyBuffer {
   }
 
   void update_last_forwarded(const ForwardResult<Storage> &forward) {
+
     scelta::match([this](SkipPacket) {},
                   [this](const Forward<Storage> &f) {
                     this->last_forwarded = f.packet.sequence;
@@ -115,15 +140,16 @@ public:
 
 template <class Storage>
 std::unique_ptr<Reassembler<Storage>>
-do_create_reassembler(ForwarderType type) {
+do_create_reassembler(protocol::StreamType type) {
   switch (type) {
-  case ForwarderType::MostRecent:
+  case protocol::StreamType::Ordered:
+  case protocol::StreamType::Depth:
     return std::make_unique<
         PacketReassembler<Storage, MostRecentReassembler<Storage>>>();
-  case ForwarderType::ForwardAll:
+  case protocol::StreamType::ReceiveAll:
     return std::make_unique<
         PacketReassembler<Storage, FullyOrderedReassembler<Storage>>>();
-  case ForwarderType::FullyOrdered:
+  case protocol::StreamType::BBO:
     return std::make_unique<
         PacketReassembler<Storage, FullyOrderedReassembler<Storage>>>();
   }
@@ -134,13 +160,13 @@ do_create_reassembler(ForwarderType type) {
 
 template <>
 std::unique_ptr<Reassembler<std::vector<std::uint8_t>>>
-create_reassembler(ForwarderType t) {
+create_reassembler(protocol::StreamType t) {
   return do_create_reassembler<std::vector<std::uint8_t>>(t);
 }
 
 template <>
 std::unique_ptr<Reassembler<seastar::net::packet>>
-create_reassembler(ForwarderType t) {
+create_reassembler(protocol::StreamType t) {
   return do_create_reassembler<seastar::net::packet>(t);
 }
 

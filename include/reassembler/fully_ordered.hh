@@ -21,6 +21,7 @@ template <class Storage> class FullyOrderedReassembler {
   void insert_pending(Packet<Storage> packet);
 
 public:
+  constexpr static bool HasOrderedPackets = true;
   ForwardResult<Storage> handle_reliable(Packet<Storage> packet,
                                          PacketSequence last_forwarded);
 

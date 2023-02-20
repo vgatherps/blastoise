@@ -1,6 +1,7 @@
 #pragma once
 
 #include "packet.hh"
+#include "protocol/keys.hh"
 
 #include <memory>
 #include <variant>
@@ -28,8 +29,6 @@ template <class Storage>
 using ForwardResult =
     std::variant<SkipPacket, Forward<Storage>, BulkForward<Storage>>;
 
-enum class ForwarderType { FullyOrdered, ForwardAll, MostRecent };
-
 template <class Storage> class Reassembler {
 public:
   virtual ForwardResult<Storage> handle_reliable(Packet<Storage> p) = 0;
@@ -38,7 +37,7 @@ public:
 };
 
 template <class Storage>
-std::unique_ptr<Reassembler<Storage>> create_reassembler(ForwarderType);
+std::unique_ptr<Reassembler<Storage>> create_reassembler(protocol::StreamType);
 
 } // namespace reassembler
 } // namespace blastoise

@@ -1,6 +1,6 @@
 [submodule "submodules/scelta"]
 	path = submodules/scelta
-	url = https://github.com/SuperV1234/scelta.git
+	url = git@github.com:vittorioromeo/scelta.git
 [submodule "submodules/seastar"]
 	path = submodules/seastar
 	url = git@github.com:vgatherps/seastar.git

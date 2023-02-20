@@ -15,6 +15,7 @@ template <class Storage> class ForwardAllReassembler {
   std::unordered_set<PacketSeqNo> unconfirmed_packets;
 
 public:
+  constexpr static bool HasOrderedPackets = false;
   ForwardResult<Storage> handle_reliable(Packet<Storage> packet,
                                          PacketSequence last_forwarded);
 

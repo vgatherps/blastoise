@@ -1,1 +1,1 @@
-target_sources(blastoise PRIVATE decode_packet.cc)
+target_sources(blastoise PRIVATE decode_packet.cc stream_manager.cc)
